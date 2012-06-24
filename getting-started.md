@@ -47,17 +47,13 @@ Bandicoot uses a CSV (Comma Separated Values) format to exchange the data.
 The first line defines the attributes of a relation and the remaining lines contain
 values (tuples).
 
-{% highlight bash %}
-$ cat one.csv
-title string,pages int,price real,genre string
-Robinson Crusoe,312,11.21,Novel
-{% endhighlight %}
+    $ cat one.csv
+    title string,pages int,price real,genre string
+    Robinson Crusoe,312,11.21,Novel
  
-{% highlight bash %}
-$ curl --data-binary @one.csv http://localhost:12345/Echo
-genre string,pages int,price real,title string
-Novel,312,11.21,Robinson Crusoe
-{% endhighlight %}
+    $ curl --data-binary @one.csv http://localhost:12345/Echo
+    genre string,pages int,price real,title string
+    Novel,312,11.21,Robinson Crusoe
 
 N.B.: examples use the curl command line utility from a terminal window
 (--data-binary @file is the syntax for submitting a file via HTTP POST).
@@ -72,20 +68,16 @@ of Relation. Relations are mathematical sets of tuples and do not allow
 duplicates. Moreover, keep in mind that sets do not have order and hence the
 tuples can be returned in a different order:
 
-{% highlight bash %}
-$ cat duplicate.csv
-title string,pages int,price real,genre string
-Oliver Twist,608,12.99,Fiction
-Robinson Crusoe,312,11.21,Novel
-Robinson Crusoe,312,11.21,Novel
-{% endhighlight %}
+    $ cat duplicate.csv
+    title string,pages int,price real,genre string
+    Oliver Twist,608,12.99,Fiction
+    Robinson Crusoe,312,11.21,Novel
+    Robinson Crusoe,312,11.21,Novel
  
-{% highlight bash %}
-$ curl --data-binary @duplicate.csv http://localhost:12345/Echo
-genre string,pages int,price real,title string
-Novel,312,11.21,Robinson Crusoe
-Fiction,608,12.99,Oliver Twist
-{% endhighlight %}
+    $ curl --data-binary @duplicate.csv http://localhost:12345/Echo
+    genre string,pages int,price real,title string
+    Novel,312,11.21,Robinson Crusoe
+    Fiction,608,12.99,Oliver Twist
 
 ## Data Manipulation
 
@@ -118,25 +110,21 @@ is determined from the value assigned to it and the value is immutable.
         return res;
     }
 
-{% highlight bash %}
-$ cat books.csv
-title string,pages int,price real,genre string
-The Iliad,576,26.40,Poetry
-The Odyssey,416,19.95,Poetry
-Oliver Twist,608,12.99,Fiction
-{% endhighlight %}
+Test:
 
-{% highlight bash %}
-$ curl --data-binary @books.csv http://localhost:12345/Fiction
-genre string,pages int,price real,title string
-Fiction,608,12.99,Oliver Twist
-{% endhighlight %}
+    $ cat books.csv
+    title string,pages int,price real,genre string
+    The Iliad,576,26.40,Poetry
+    The Odyssey,416,19.95,Poetry
+    Oliver Twist,608,12.99,Fiction
 
-{% highlight bash %}
-$ curl --data-binary @books.csv http://localhost:12345/FictionPrice
-avgPrice real
-12.99
-{% endhighlight %}
+    $ curl --data-binary @books.csv http://localhost:12345/Fiction
+    genre string,pages int,price real,title string
+    Fiction,608,12.99,Oliver Twist
+
+    $ curl --data-binary @books.csv http://localhost:12345/FictionPrice
+    avgPrice real
+    12.99
 
 ## Data Persistence
 
@@ -162,17 +150,15 @@ back immediately.
         return books;
     }
 
-{% highlight bash %}
-$ curl --data-binary @books.csv http://localhost:12345/Write
-{% endhighlight %}
+Test:
 
-{% highlight bash %}
-$ curl http://localhost:12345/Titles
-title string
-The Iliad
-The Odyssey
-Oliver Twist
-{% endhighlight %}
+    $ curl --data-binary @books.csv http://localhost:12345/Write
+
+    $ curl http://localhost:12345/Titles
+    title string
+    The Iliad
+    The Odyssey
+    Oliver Twist
 
 N.B: there are some limitations while working with global variables:
 * only one assignment per variable is possible within a function
@@ -214,65 +200,59 @@ below removes all the tuples which do not match to the given boolean expression.
         books = select genre != "Fiction" books;
     }
 
-Insert Example:
-{% highlight bash %}
-$ curl http://localhost:12345/Titles
-title string
-The Iliad
-The Odyssey
-Oliver Twist
+Insert test:
+    $ curl http://localhost:12345/Titles
+    title string
+    The Iliad
+    The Odyssey
+    Oliver Twist
 
-$ cat more-books.csv
-title string,pages int,price real,genre string
-Oliver Twist,608,12.99,Fiction
-Grimm's Fairy Stories,560,14.50,Fairy tales
+    $ cat more-books.csv
+    title string,pages int,price real,genre string
+    Oliver Twist,608,12.99,Fiction
+    Grimm's Fairy Stories,560,14.50,Fairy tales
 
-$ curl --data-binary @more-books.csv http://localhost:12345/AddBooks
+    $ curl --data-binary @more-books.csv http://localhost:12345/AddBooks
 
-$ curl http://localhost:12345/Titles
-title string
-The Iliad
-The Odyssey
-Oliver Twist
-Grimm's Fairy Stories
-{% endhighlight %}
+    $ curl http://localhost:12345/Titles
+    title string
+    The Iliad
+    The Odyssey
+    Oliver Twist
+    Grimm's Fairy Stories
 
-Update Example:
-{% highlight bash %}
-$ curl http://localhost:12345/Prices
-price real,title string
-26.4,The Iliad
-19.95,The Odyssey
-12.99,Oliver Twist
-14.5,Grimm's Fairy Stories
+Update test:
+    $ curl http://localhost:12345/Prices
+    price real,title string
+    26.4,The Iliad
+    19.95,The Odyssey
+    12.99,Oliver Twist
+    14.5,Grimm's Fairy Stories
 
-$ curl http://localhost:12345/UpdatePrice
+    $ curl http://localhost:12345/UpdatePrice
 
-$ curl http://localhost:12345/Prices
-price real,title string
-23.76,The Iliad
-17.955,The Odyssey
-11.691,Oliver Twist
-13.05,Grimm's Fairy Stories
-{% endhighlight %}
+    $ curl http://localhost:12345/Prices
+    price real,title string
+    23.76,The Iliad
+    17.955,The Odyssey
+    11.691,Oliver Twist
+    13.05,Grimm's Fairy Stories
 
-Delete Example:
-{% highlight bash %}
-$ curl http://localhost:12345/Titles
-title string
-The Iliad
-The Odyssey
-Oliver Twist
-Grimm's Fairy Stories
+Delete test:
+    $ curl http://localhost:12345/Titles
+    title string
+    The Iliad
+    The Odyssey
+    Oliver Twist
+    Grimm's Fairy Stories
 
-$ curl http://localhost:12345/DeleteFiction
+    $ curl http://localhost:12345/DeleteFiction
 
-$ curl http://localhost:12345/Titles
-title string
-The Iliad
-The Odyssey
-Grimm's Fairy Stories
-{% endhighlight %}
+    $ curl http://localhost:12345/Titles
+    title string
+    The Iliad
+    The Odyssey
+    Grimm's Fairy Stories
 
 Now you know enough to start writing your own Bandicoot applications. If you
 are thinking of using Bandicoot with the JavaScript, you can find some useful

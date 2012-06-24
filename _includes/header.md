@@ -1,4 +1,6 @@
-# Bandicoot
+![bandicoot](/logo.png)
+
+[Home](/)
 
 [Getting Started](/getting-started.html)
 

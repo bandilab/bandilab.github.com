@@ -17,14 +17,8 @@
     <div class="wrapper">
       {% capture header %}{% include header.md %}{% endcapture %}
       {% capture footer %}{% include footer.html %}{% endcapture %}
-      {% capture spectoc %}{% include spectoc.md %}{% endcapture %}
 
-      <header>
-        {{ header | markdownify }}
-        {% if page.spec %}
-        {{ spectoc | markdownify }}
-        {% endif %}
-      </header>
+      <header>{{ header | markdownify }}</header>
       <section>
         {% if page.blog %}
         <h1>{{ page.title }}</h1>

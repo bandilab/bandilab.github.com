@@ -4,6 +4,19 @@ title: bandicoot - specification
 spec: true
 ---
 
+Table of contents:
+
+* [Language Specification](#language_specification)
+  * [Keywords](#keywords)
+  * [Program Structure](#program_structure)
+  * [Primitive Types](#primitive_types)
+  * [Identifiers](#identifiers)
+  * [Relational Types](#relational_types)
+  * [Functions](#functions)
+  * [Relational Operators and Expressions](#relational_operators_and_expressions)
+* [Transactions](#transactions)
+* [API](#API)
+
 # Language Specification
 ## Keywords
 
