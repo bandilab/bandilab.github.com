@@ -1,0 +1,85 @@
+<p align="right"><i>2011-10-02: Write Intensive Workloads -- Ostap</i></p>
+
+<p>Some basic IO characteristics are covered in test/perf/relation.c test case. It stores and then loads a relational variable of different sizes (1K, 10K, 100K, 1000K tuples) and measures the time spent on the corresponding operation. But this test is very low-level, it measures the load/store performance from within the bandicoot rather than from the outside world. I created a new test case which goes front-to-back and continuously inserts new tuples into the same variable. Below you will find the test description along with my findings and thoughts on further performance improvements.</p>
+
+<h2>Current State</h2>
+
+<p>The test case is available in the origin/io branch in our code repository (see downloads). To start it, use &quot;./ctl pack &amp;&amp; ./ctl append" sequence of commands. Here is the output from my laptop (Mac OS X, Core i5 1.7GHz, SSD - filesystem mounted without sync option):<p/>
+
+<pre>
+  num_chunks  chunk_size        time   chunk_avg        disk   disk_peak
+           1        1000        12ms        10ms         1MB         1MB
+           1       10000        31ms        29ms         1MB         2MB
+           1      100000       260ms       258ms         8MB         8MB
+           1     1000000      3384ms      3381ms        70MB        77MB
+          10        1000       129ms      11.6ms         1MB        74MB
+          10       10000       785ms      77.1ms         8MB        39MB
+          10      100000      8663ms       865ms        70MB       390MB
+        1000           1      6927ms     5.979ms         1MB        70MB
+</pre>
+
+<p>The test continuously inserts (appends) new tuples into a variable (using += operator). The append is characterized by two parameters: number of tuples within the chunk (chunk_size) and number of chunks written (num_chunks). All the rest of the fields are measurements taken during the execution:</p>
+<ul>
+    <li><b>time</b> - overall execution time from the client perspective.</li>
+    <li><b>chunk_avg</b> - average time per chunk from the server perspective.</li>
+    <li><b>disk</b>- disk consumption after the garbage collection (du -m).</li>
+    <li><b>disk_peak</b>- maximum disk size during the test (max du -m).</li>
+</ul>
+
+<p>Single chunk writes are relatively fast, though it is important to note that the test relation contains only two attributes (int and string) which makes the size relatively small. I reused the same test relation generator as in the other performance tests so that the results could be comparable.</p>
+
+<p>Originally, I wanted to illustrate the insertion problem and share some ideas on improvements (see Insert and Delete below), but while running the tests I realised that there are two more problems:</p>
+<ol>
+    <li>there is a big time difference between writing 1 chunk of 1000 tuples, and 1000 chunks of 1 tuple</li>
+    <li>when many chunks are being written disk_peak reaches quite large values; e.g. 1000 chunks of 1 tuple can consume up to 70MB of disk space during append, even though the actual size on disk is roughly 1MB</li>
+</ol>
+
+<p>Such a behaviour is a combination of several problems:</p>
+
+<h2>Function Call Overhead</h2>
+
+<p>Inserting 1000 chunks of 1 tuple takes almost 7000ms while inserting 1 chunk with 1000 tuples just 12ms. A big part of this time is spent on the steps which are not always necessary:</p>
+<ul>
+    <li>establishing a TCP connection with the client</li>
+    <li>initializing and freeing the whole environment (parsing the source, initializing functions, etc. then freeing it all up)</li>
+</ul>
+
+<p>Always establishing a TCP connection can be avoided once bandicoot gets to know how to deal with HTTP keep-alive. And initializing and freeing the whole environment is completely unnecessary, it just requires quite some code restructuring.</p>
+
+<p>BTW, another big overhead was spawning the processors (those processes which are performing the actual function execution) but this step was eliminated in v4.</p>
+
+<h2>Insert and Delete</h2>
+
+<p>Currently, bandicoot knows of only one write instruction (store) which is directly related to the assignment operator (&quot;a = b;&quot;) and its shorthand versions (&quot;a += b;&quot; and &quot;a -= b;&quot;) are transformed into the corresponding assignments. In other words, to insert new tuples into a variable bandicoot performs the following steps:</p>
+<ul>
+    <li>read the correct version of the relational variable (determined by tx)</li>
+    <li>perform a union operation with the input (#n log #n + #m log #n + #m)</li>
+    <li>write the whole result back to volume</li>
+</ul>
+
+<p>A similar approach is applied to the tuple deletion but using the minus operator. It obviously gets quite slow with the growth of the target variable. To get the most out of these operations bandicoot needs to be able to distinguished between different instructions (insertions, deletions, and assignments):</p>
+<pre>
+    a += b; # insertion
+    a -= b; # deletion
+    a = b;  # assignment
+</pre>
+
+<p>Ideally both operations are performed in place, so that there is no need to read the whole target variable and perform union or minus (for inserts or deletes). This is relatively easy to achieve for insert by keeping the target variable sorted and performing new tuple lookups using binary search. But for deletions it is not that straight forward as the deletion can be based on a match on less attributes than it is available in the target variable (e.g. deleting given book-titles from books). &quot;Insert and Delete&quot; problem also relates to the next one.</p>
+
+<h2>Excessive Disk Usage (disk_peak)</h2>
+
+<p>There are two aspects of this problem:<p>
+<ul>
+    <li>long pause between the garbage collections (30 secs)</li>
+    <li>granularity of variable versions</li>
+</ul>
+
+<p>Volumes perform synchronization with the transaction manager every 30 secs (see <a href="/blog/2011-06-22.Ostap.Running_on_Multiple_Nodes.html">here</a> for more info), at that point unused (old) versions of the global variables are removed, and missing (latest) versions are copied over from other volumes (but the latter is for distributed mode only). This process needs to go through the transaction manager since only it knows which versions are not required anymore (see <a href="/blog/2011-01-23.Julius.Transactions_in_the_Bandicoot.html">here</a> for more info). During these 30 seconds a user might create many new variable versions (as in 1000 chunks of 1 tuple case), and only then the garbage collection kicks-in and removes all unnecessary versions.</p>
+
+<p>On the other hand, the granularity at which variable versions are kept is very coarse. Today bandicoot just keeps the whole variable as a version rather than a particular change set. Given that insertion and deletion are handled as separate commands it becomes possible to keep only the change sets in volumes. This way bandicoot can keep disk_peak values exactly the same for two cases: writing 1 chunk with 1000 tuples and writing 1000 chunks with 1 tuple. If each tuple insert creates a single change set consisting of 1 tuple then the disk consumption will be the same for both cases. If a variable is rewritten (as in &quot;a = b&quot; case) it is also possible to generate just insertions and deletions, but I will leave it for now.</p>
+
+<p>Performing garbage collection as soon as the variable version becomes obsolete is one way of addressing excessive disk usage, but resolving the problem with granularity of changes opens more interesting perspectives (e.g. for distributed mode) yet keeping the disk consumption relatively low.</p>
+
+<h2>Conclusions</h2>
+
+<p>Well, there is plenty of work ahead :-) Hopefully this 10000-feet view of the existing problems and potential solutions will help to drive the discussion forward. Please share your comments and ideas below or on our <a href="http://groups.google.com/group/bandicoot">Google Group</a>. I will be updating this page as the implementations emerge.</p>

@@ -1,0 +1,140 @@
+---
+blog: true
+layout: page
+author: Julius Chrobak
+title: Transactions in the Bandicoot
+date: 2011 01 23
+---
+
+<p>
+One of the most interesting features of the Bandicoot system is its simple
+approach for transaction handling. In this blog I would like to show how
+intuitive and powerfull the transactions are.
+</p>
+<p>
+Before we move onto the details it's important to note that Bandicoot
+implements all ACID<a href="#links">[1]</a> properties. It's important to keep
+this in mind when writing applications in the Bandicoot. It'll help you to relax
+and trust the system.
+</p>
+<p>
+So, let's start very simple. Look at the following piece of code:
+</p>
+<pre>
+rel Order {
+    item: string,
+    client: int
+}
+
+orders: Order;
+
+fn AddOrder(o: Order)
+{
+    orders = orders + o;
+}
+</pre>
+<p>
+I believe the code is self-explanatory and does not require further comments.
+The important bit to understand is how the AddOrder function works.
+The function modifies a global variable and if more than one execution is being 
+performed at a time it requires a synchronization of the assignment.
+Otherwise, we could end up with corrupted value. Note that this is no different
+to a general purpose programming language (i.e. Java synchronized blocks 
+<a href="#links">[2]</a>).
+What is different is the fact that the Bandicoot takes care of this on your
+behalf. Every time you are modifying a global variable you can be sure that
+there is no-one else doing the same.
+</p>
+<p>
+But the Bandicoot goes even further. The synchronization is always done on the
+function level. 
+It never happens just around a single assignment. Let's have a look at the
+following code:
+</p>
+<pre>
+pending: Order;
+
+fn MovePending()
+{
+    orders = orders + pending;
+    pending = pending - pending;
+}
+
+fn MoveOrders()
+{
+    pending = pending + orders;
+    orders = orders - orders;
+}
+</pre>
+<p>
+We have introduced another variable, pending orders. We also added functions
+which modify the same variables but in a different order. Due to the
+synchronization on the function level this is not a problem and the system will
+simply execute one function after the other. This also means, there are no 
+deadlocks going to happen regardless of how the code is written.
+</p>
+<p>
+There is also another important action happening on the function level; commit
+or rollback. Even though you are able to modify a value of a global variable
+in the first statement of a function, in reality the new values are not
+visible until the function execution is finished. This provides a complete
+isolation and no operation can see partial state of variables. If there is an
+error during an execution the changes are rolled-back and your variables stay
+in a consistent state.
+</p>
+<p>
+This all sounds great, but what about reads? How does it work? Are the
+read-only functions synchronized as well? No, if you have read-only functions
+they are executed in parallel with writes and other reads. This is implemented
+via snapshots in the system. The Bandicoot keeps multiple versions of global
+variables. The older, not latest, versions are kept as long as there is someone 
+reading them. To be more specific, at a time a function is invoked
+the system determines what versions, of all variables used in the functions, will 
+be read.
+</p>
+<p>
+Let's now discuss this more in details with using MovePending and GetAll
+function as defined below:
+</p>
+<pre>
+fn GetAll(): Order
+{
+    return orders + pending;
+}
+</pre>
+<p>
+If the GetAll and MovePending functions are executed at the same
+time, the GetAll function will progress and return the result as of the 
+time the function was invoked. Imagine your execution of the GetAll function 
+is in progress and it's just finished reading the orders variable. It is about
+to read the pending one which in the meanwhile was modified by an execution of the
+MovePending. The fact that the MovePending was executed while GetAll is
+running does not have any impact on the results. The version of the pending 
+variable you are going to see is the previous version consistent with
+the version of the orders variable you have just read.
+</p>
+<p>
+<h2>Summary</h2>
+To sum up, there are four very important features implied from the
+way how the Bandicoot implements transactions:
+<ul>
+    <li>conflicting write functions are synchronized as a whole,
+    instead of synchronizing each assignment separately</li>
+    <li>changes made in a function are visible only after the whole
+    execution</li>
+    <li>a function reads consistent state across multiple variables; as of
+    the time the function is invoked</li>
+    <li>reads of the same variable in a function always return the
+    same values</li>
+</ul>
+</p>
+<h2></h2>
+
+<a name="links"></a>
+<h2>Resources</h2>
+
+<ol>
+    <li><a href="http://en.wikipedia.org/wiki/ACID_transactions">ACID
+        transactions on wikipedia</a></li>
+    <li><a href="http://download.oracle.com/javase/tutorial/essential/concurrency/syncmeth.html">Java synchronized block</a></li>
+</ol>
