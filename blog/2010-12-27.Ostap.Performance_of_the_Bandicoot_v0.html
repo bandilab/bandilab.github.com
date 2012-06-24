@@ -1,0 +1,145 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Performance of the Bandicoot v0</title>
+    
+    <link rel="stylesheet" href="/stylesheets/styles.css">
+    <link rel="stylesheet" href="/stylesheets/extensions.css">
+    <link rel="stylesheet" href="/stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      
+      
+      
+
+      <header>
+        <h1 id='bandicoot'>Bandicoot</h1>
+
+<p><a href='/getting-started.html'>Getting Started</a></p>
+
+<p><a href='/specification.html'>Specification</a></p>
+
+<p><a href='/webapps.html'>Webapps</a></p>
+
+<p><a href='/download.html'>Download</a></p>
+
+<p><a href='/blog.html'>Blog</a></p>
+
+<p><a href='/about.html'>About</a></p>
+        
+      </header>
+      <section>
+        
+        <h1>Performance of the Bandicoot v0</h1>
+        <p><small>Published by Ostap Cherkashin on 2010 12 27.</small></p>
+        
+        <p>The first cut of the Bandicoot database (v0) provides enough functionality to start building some applications. Though, as with any new system, there are several important questions arise: stability, performance, &#8230;? This blog post is about performance of the system. With regard to stability I can only say that even though there are quite some structured tests available, it is still not recommended for production use.</p>
+
+<h2 id='execution'>Execution</h2>
+
+<p>With the Bandicoot application developers control the execution path. This is fairly different from other databases where this responsibility is split between a human (programmer) and another &#34;living organism&#34; (query optimizer). It happens that sometimes they misunderstand each other and as a result we get two beliefs:&lt;/p&gt;</p>
+
+<ul>
+<li>&#34;query optimization is a rocket science&#34;</li>
+
+<li>&#34;databases are slow&#34;</li>
+</ul>
+
+<p>I will try to address the first one here. With the second one (and having the v0 tag comment say &#34;brute force preview&#34;) I will try to avoid the discussion for a little while ;-)</p>
+
+<p>In relational algebra there is only one data structure (relation <a href='#resources'>1</a>) and several operators (select, join, etc. <a href='#resources'>2</a>). Relations represent your data and operators take these relations as input and produce different ones as an output. From the performance perspective one of the most important properties of a relation is the number of tuples (or rows) in its body. Execution time of an operator heavily depends on this number (it is also used to express the algorithmic complexity below). In order to improve a function performance one should try to reduce the data sets passed from one operator to another as early as possible. This is a fairly intuitive idea and it also greatly impacts the performance. To help with this and to facilitate the computation reuse the Bandicoot introduced temporary variables <a href='#resources'>3</a>. Apart from improving performance they also make code more readable.</p>
+
+<p>The table below lists the complexities for different relational operators in the Bandicoot v0. I will use #n as the number of tuples in a relation variable n.</p>
+<table>
+    <thead>
+        <th>Operator</th>
+        <th>Sample Expression</th>
+        <th>Big-O</th>
+    </thead>
+    <tr>
+        <td>join</td>
+        <td>m * n</td>
+        <td>O(#m * #n)</td>
+    </tr>
+    <tr>
+        <td>minus (semidiff)</td>
+        <td>m - n</td>
+        <td>O(#m * #n)</td>
+    </tr>
+    <tr>
+        <td>union</td>
+        <td>m + n</td>
+        <td>O(#m + #m*#n)</td>
+    </tr>
+    <tr>
+        <td>select</td>
+        <td>n select(x &lt; 0)</td>
+        <td>O(#n)</td>
+    </tr>
+    <tr>
+        <td>extend</td>
+        <td>n extend(x = 1)</td>
+        <td>O(#n)</td>
+    </tr>
+    <tr>
+        <td>project</td>
+        <td>n project(x, y)</td>
+        <td>O(#n^2)</td>
+    </tr>
+    <tr>
+        <td>summary</td>
+        <td>(m, n) summary(x = max(y, 0))</td>
+        <td>O(#m * #n)</td>
+    </tr>
+</table>
+<p>As you can see most of the algorithms are of quadratic nature, and thus the limits of v0 are quite low in terms of number of tuples. I am working on the patch to improve this situation, and meanwhile you can master the temporary variables which is a good practice in any case.</p>
+
+<h2 id='figures'> Figures</h2>
+
+<p>To turn the formulas above into the actual numbers you can use the performance tests available with the system source code. One of the interesting ones is perf/relation. It shows the execution times for some of the workloads on different relational operators. Here is the output from a run on my laptop (core i7 @2GHz and -Os gcc option). Note, that all of the test tuples have two attributes (string and integer) and are pre-generated before each test execution.</p>
+
+<pre><code>$ cd bandicoot
+$ ctl pack
+$ bin/test/perf/relation
+   write 100000 tuples in 18ms
+    read 100000 tuples in 21ms
+   write 1000000 tuples in 135ms
+    read 1000000 tuples in 175ms
+    join 1000x1000 tuples in 20ms
+    join 10000x10000 tuples in 1786ms
+semidiff 1000x1000 tuples (res=500 tuples) in 15ms
+semidiff 10000x10000 tuples (res=5000 tuples) in 1533ms
+ project 1000 tuples from 1000 in 9ms
+ project 10000 tuples from 10000 in 876ms
+  select 1 tuples from 100000 in 11ms
+  select 1 tuples from 1000000 in 97ms
+   union 1000x1000 tuples (res=1500 tuples) in 20ms
+   union 10000x10000 tuples (res=15000 tuples) in 1752ms
+  extend 100000 tuples in 37ms
+  extend 1000000 tuples in 372ms
+     sum 1000x1000 tuples in 20ms
+     sum 10000x10000 tuples in 1817ms</code></pre>
+
+<p>The first rows show the read/write performance for a data volume (I have an SSD drive + there are no fsync/fdatasync calls). The rest are the execution times of the relational operators.</p>
+
+<h2 id='resources'> Resources</h2>
+<ol>
+    <li>read more about relations on <a href='http://en.wikipedia.org/wiki/Relation_(database)'>wikipedia</a> or in the <a href='/specification.html'>spec</a></li>
+    <li>more about the algebra on <a href='http://en.wikipedia.org/wiki/Relational_algebra'>wikipedia</a> or in the <a href='/specification.html'>spec</a></li>
+    <li>learn more about temporary variables on the <a href='/getting-started.html'>getting started</a> page or in the <a href='/specification.html'>spec</a></li>
+</ol>
+      </section>
+      <footer><p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+<p><small>&copy; 2012 bandilab.org</small></p>
+</footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+  </body>
+</html>

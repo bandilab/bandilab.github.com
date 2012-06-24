@@ -3,10 +3,11 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <title>bandicoot by bandilab</title>
-
-    <link rel="stylesheet" href="stylesheets/styles.css">
-    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <title>bandicoot - having fun with structured data</title>
+    
+    <link rel="stylesheet" href="/stylesheets/styles.css">
+    <link rel="stylesheet" href="/stylesheets/extensions.css">
+    <link rel="stylesheet" href="/stylesheets/pygment_trac.css">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
     <!--[if lt IE 9]>
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -14,16 +15,29 @@
   </head>
   <body>
     <div class="wrapper">
+      
+      
+      
+
       <header>
-        <h1>bandicoot</h1>
-        <p></p>
+        <h1 id='bandicoot'>Bandicoot</h1>
 
+<p><a href='/getting-started.html'>Getting Started</a></p>
 
-        <p class="view"><a href="https://github.com/bandilab">View My GitHub Profile</a></p>
+<p><a href='/specification.html'>Specification</a></p>
 
+<p><a href='/webapps.html'>Webapps</a></p>
+
+<p><a href='/download.html'>Download</a></p>
+
+<p><a href='/blog.html'>Blog</a></p>
+
+<p><a href='/about.html'>About</a></p>
+        
       </header>
       <section>
-        <p>Bandicoot is a programming system with a new set-based programming language, persistency capabilities, and run-time environment. The language is similar to general purpose programming languages where you write functions/methods and access data through variables. Though, in Bandicoot, you always manipulate data in sets using a small set-based algebra (the <a href="http://bandilab.org/bandicoot-algebra.pdf">relational algebra</a>. Here is a small program which manages your book shelf:</p>
+        
+        <p>Bandicoot is a programming system with a new set-based programming language, persistency capabilities, and run-time environment. The language is similar to general purpose programming languages where you write functions/methods and access data through variables. Though, in Bandicoot, you always manipulate data in sets using a small set-based algebra (the <a href='http://bandilab.org/bandicoot-algebra.pdf'>relational algebra</a>. Here is a small program which manages your book shelf:</p>
 
 <pre><code>type Books {
     title string,
@@ -41,33 +55,40 @@ fn List() Books
 fn Append(b Books) void
 {
     shelf += b;
-}
-</code></pre>
+}</code></pre>
 
 <p>Here are some of the features:</p>
 
 <ul>
 <li>native support for set-based programming using the relational algebra</li>
-<li>simple syntax for common set-operators: "+" (union), "-" (minus), etc.</li>
+
+<li>simple syntax for common set-operators: &#34;+&#34; (union), &#34;-&#34;</li>
+
+<li>(minus), etc.</li>
+
 <li>all functions are automatically exposed via HTTP, e.g. /List, /Append</li>
+
 <li>supports persistency via global variables (with transactions and ACID)</li>
+
 <li>can run on multiple computers in a distributed mode</li>
+
 <li>small binary ~100KB</li>
-</ul><p>Follow:</p>
+</ul>
+
+<p>Follow:</p>
 
 <ul>
-<li>GitHub: <a href="https://github.com/bandilab" class="user-mention">@bandilab</a>
-</li>
-<li>Twitter: <a href="http://twitter.com/bandilab">@bandilab</a>
-</li>
-<li><a href="http://groups.google.com/group/bandicoot">Google Group</a></li>
+<li>GitHub: @bandilab</li>
+
+<li>Twitter: <a href='http://twitter.com/bandilab'>@bandilab</a></li>
+
+<li><a href='http://groups.google.com/group/bandicoot'>Google Group</a></li>
 </ul>
       </section>
-      <footer>
-        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
-      </footer>
+      <footer><p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+<p><small>&copy; 2012 bandilab.org</small></p>
+</footer>
     </div>
     <script src="javascripts/scale.fix.js"></script>
-    
   </body>
 </html>

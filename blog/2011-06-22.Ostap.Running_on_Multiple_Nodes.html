@@ -1,0 +1,146 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Running on Multiple Nodes</title>
+    
+    <link rel="stylesheet" href="/stylesheets/styles.css">
+    <link rel="stylesheet" href="/stylesheets/extensions.css">
+    <link rel="stylesheet" href="/stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      
+      
+      
+
+      <header>
+        <h1 id='bandicoot'>Bandicoot</h1>
+
+<p><a href='/getting-started.html'>Getting Started</a></p>
+
+<p><a href='/specification.html'>Specification</a></p>
+
+<p><a href='/webapps.html'>Webapps</a></p>
+
+<p><a href='/download.html'>Download</a></p>
+
+<p><a href='/blog.html'>Blog</a></p>
+
+<p><a href='/about.html'>About</a></p>
+        
+      </header>
+      <section>
+        
+        <h1>Running on Multiple Nodes</h1>
+        <p><small>Published by Ostap Cherkashin on 2011 06 22.</small></p>
+        
+        <p>New functionality implemented in v3 makes it possible to run bandicoot programs on multiple computers in a TCP/IP network. This way you can improve data availability and also increase the transaction throughput (though the later depends on the frequency of writes, if there are any).</p>
+
+<h2>How it Works</h2>
+
+<p>Let's have a look at how bandicoot handles a function invocation. It all starts with a client initiating an HTTP request (e.g. GET /List HTTP/1.1) then bandicoot executes the specified function (e.g. List) and returns the result back to the client. Here is a sequence diagram which illustrates this process in more details:</p>
+<pre><small>
+                <b>exec</b>                    <b>tx</b>                <b>vol</b>
+                ----                    --                ---
+                 |                       |                 |
+ HTTP GET/POST   |                       |                 |
+- - - - - - - - &gt;|                       |                 |
+                 | start a transaction   |                 |
+                 |- - - - - - - - - - - &gt;|                 |
+                 |                       |                 |
+                 | read (optional)       |                 |
+                 |- - - - - - - - - - - - - - - - - - - - &gt;|
+                 |                       |                 |
+                 | calculation           |                 |
+                 |- - - - - - +          |                 |
+                 |            |          |                 |
+                 |&lt; - - - - - +          |                 |
+                 |                       |                 |
+                 | write (optional)      |                 |
+                 |- - - - - - - - - - - - - - - - - - - - &gt;|
+                 |                       |                 |
+                 | commit / revert       |                 |
+                 |- - - - - - - - - - - &gt;|                 |
+&lt; - - - - - - - -|                       |                 |
+                 |                       |                 |
+</small></pre>
+
+<p>Internally, bandicoot is split into three components:</p>
+<ul>
+    <li>executor (exec) performs the actual function execution (going through the function statement by statement), it is also responsible for initiating a transaction and handling reads and writes (if required).</li>
+    <li>transaction manager (tx) is responsible for establishing data consistency between concurrent transactions.</li>
+    <li>volume (vol) provides access to global variables; keep in mind that it is not necessary to access any of the global variables in a function, and hence the volume might not be involved at all.</li>
+</ul>
+
+<p>The key idea here is that it is possible to start one or more executor to offload the CPU-intensive work, and one or more volume to offload the IO-intensive work. Transaction manager is not distributed (yet) so only one instance could be run per cluster (it is indeed a single point of failure for now). On the other hand, tx is quite modest in terms of resources so scaling it to multiple computers might not be of a great benefit, it is more about system availability. Volumes provide storage for global variables but when there are multiple volumes running they synchronize periodically between each other, so the data is eventually distributed. From data-consistency perspective, executors always go to the volume which has the correct version of a given variable (with a strong preference for localhost volumes).<p>
+
+<h2>Deployment</h2>
+
+<p>Obviously, the startup parameters had to change in order to support different modes of operation. The quickest way to start is by reviewing the usage instructions:<p>
+
+<pre>
+$ bandicoot
+usage: bandicoot &lt;command&gt; &lt;args&gt;
+
+standalone commands:
+  start -p &lt;port&gt; -d &lt;data.dir&gt; -c &lt;source.file&gt; -s &lt;state.file&gt;
+
+distributed commands:
+  tx    -p &lt;port&gt; -c &lt;source.file&gt; -s &lt;state.file&gt;
+  vol   -p &lt;port&gt; -d &lt;data.dir&gt; -t &lt;tx.host:port&gt;
+  exec  -p &lt;port&gt; -t &lt;tx.host:port&gt;
+
+[bandicoot v3, http://bandilab.org, built on Sun Jun 12 11:30:55 UTC 2011]
+</pre>
+
+<p>There are two types of commands: standalone and distributed. In standalone mode, when bandicoot starts up, it bootstraps all three components and then interconnects them together. In distributed all three components can be run individually. It all starts with the tx which is a centralised entity in the whole cluster. Then executor and volume take transaction manager connection details as arguments.</p>
+
+<p>In general, it is up to a user to decide how many executors and volumes to start and where to run all of them. If there are 3 or more computers available you can setup a cluster using the following topology, e.g.:</p>
+
+<pre>
+
+  <u>host1</u>         <u>host2</u>       <u>host3</u>
+
+  +------+      +----+      +------+
+  | exec |------| tx |------| exec |
+  +------+      +----+      +------+
+                 |  |
+  +------+       |  |       +------+
+  | vol  |-------+  +-------| vol  |
+  +------+                  +------+
+
+</pre>
+
+<p>This can be done in the following way:</p>
+<pre>
+host2$ bandicoot tx -p 12300 -c program.b -s state
+</pre>
+
+<pre>
+host1$ bandicoot exec -p 12345 -t host2:12300
+host1$ bandicoot vol -p 12301 -t host2:12300 -d data/
+</pre>
+
+<pre>
+host3$ bandicoot exec -p 12345 -t host2:12300
+host3$ bandicoot vol -p 12301 -t host2:12300 -d data/
+</pre>
+
+<p>This way you get two executors running on host1:12345 and on host3:12345. All requests executed via host1 are always consistent with the ones executed via host3. Volumes periodically sync the data, so once the required version is available on host1 executor will always go to localhost thus avoiding the network round-trips.</p>
+
+<p>Hopefully this post provides enough information to get started with the new functionality. If you have more questions please leave your comments below.</p>
+
+      </section>
+      <footer><p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+<p><small>&copy; 2012 bandilab.org</small></p>
+</footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+  </body>
+</html>

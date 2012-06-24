@@ -1,0 +1,167 @@
+<p align="right"><i>2012-05-17: SQL vs. Bandicoot v5 -- Julius</i></p>
+
+<p>
+This is a new version of the previous blog ... To keep the information up
+date...
+</p>
+
+<h3>SELECT FROM</h3>
+<p>This is the most used expression in SQL. It returns all the rows
+from a table, allows you to define which columns to pick, or define new
+derived columns:
+</p>
+<table width="100%">
+    <tr>
+        <th width="50%">SQL</th>
+        <th width="50%">Bandicoot</th>
+    </tr>
+    <tr>
+        <td>
+<pre><b>select</b> * <b>from</b> books</pre>
+        </td>
+        <td>
+<pre>books</pre>
+        </td>
+    </tr>
+    <tr>
+        <td width="50%">
+<pre>
+<b>select</b> title, author <b>from</b> books
+</pre>
+        </td>
+        <td width="50%">
+<pre>
+<b>project</b> title, author books
+</pre>
+        </td>
+    </tr>
+    <tr>
+        <td width="50%">
+<pre>
+<b>select</b> b.*, 2011 - year as age
+  <b>from</b> books b
+</pre>
+        </td>
+        <td width="50%">
+<pre>
+<b>extend</b> age = 2011 - year books
+
+</pre>
+        </td>
+    </tr>
+</table>
+<p>or everything together</p>
+<table width="100%">
+    <tr>
+        <td width="50%">
+<pre>
+<b>select</b> title, author, 2011 - year <b>as</b> age
+  <b>from</b> books</pre>
+        </td>
+        <td width="50%">
+<pre>
+<b>project</b> title, author, age
+        (<b>extend</b> age = 2011 - year books)
+</pre>
+        </td>
+    </tr>
+</table>
+
+<h3>WHERE</h3>
+<table width="100%" border="0">
+    <tr>
+        <td width="50%">
+<pre>
+<b>select</b> *
+  <b>from</b> books
+ <b>where</b> author = 'John Irving'
+</pre>
+        </td>
+        <td width="50%">
+<pre>
+<b>select</b> author == "John Irving" books
+
+
+</pre>
+        </td>
+    </tr>
+</table>
+
+<h3>JOIN</h3>
+<table width="100%" border="0">
+    <tr>
+        <td width="50%">
+<pre>
+<b>select</b> *
+  <b>from</b> books <b>natural join</b> stores
+</pre>
+        </td>
+        <td width="50%">
+<pre>
+<b>join</b> books stores
+
+</pre>
+        </td>
+    </tr>
+</table>
+
+<p>
+note: there are several different join operators defined in SQL. Bandicoot
+supports only natural inner join (a full match on equality of all the columns
+with the same name and type):
+</p>
+
+<h3>GROUP BY</h3>
+<table width="100%" border="0">
+    <tr>
+        <td width="50%">
+<pre>
+<b>select</b> genre, 
+       count(*) as cnt,
+       avg(pages) as pages
+  <b>from</b> books
+ <b>group by</b> genre
+</pre>
+        </td>
+        <td width="50%">
+<pre>
+<b>summary</b> cnt = cnt, pages = (avg pages 0.0)
+        books
+        (<b>project</b> genre books)
+
+
+</pre>
+        </td>
+    </tr>
+</table>
+
+<h3>All together (ie using functions)</h3>
+<p>
+To get a better picture how this all works in reality I show you an example of
+a complete Bandicoot function. Let's imagine you have a simple database of books
+and stores and you want to find out what is the average price of books per
+author providing the genre you are interested in:
+</p>
+
+<pre>
+<b>fn</b> prices(g <b>string</b>) {author <b>string</b>, avgPrice <b>real</b>}
+{
+    <b>var</b> onSell = <b>join</b> stores (<b>select</b> genre == g books);
+
+    <b>return</b> <b>summary</b> avgPrice = (avg price 0.0)
+                   onSell
+                   (<b>project</b> author onSell);
+}
+</pre>
+
+<p>
+To compare this with SQL I would need to pick a specific implementation of
+procedural language (ie Oracle's PL/SQL or Postgres' PL/pgSQL). To leave it
+simple I only write the select statement which executes the same calculation:
+</p>
+<pre>
+<b>select</b> author, avg(price) as avgPrice
+  <b>from</b> books <b>natural join</b> stores
+ <b>where</b> genre == g
+ <b>group by</b> author
+</pre>

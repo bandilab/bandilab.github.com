@@ -1,0 +1,122 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>bandicoot - downloads</title>
+    
+    <link rel="stylesheet" href="/stylesheets/styles.css">
+    <link rel="stylesheet" href="/stylesheets/extensions.css">
+    <link rel="stylesheet" href="/stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      
+      
+      
+
+      <header>
+        <h1 id='bandicoot'>Bandicoot</h1>
+
+<p><a href='/getting-started.html'>Getting Started</a></p>
+
+<p><a href='/specification.html'>Specification</a></p>
+
+<p><a href='/webapps.html'>Webapps</a></p>
+
+<p><a href='/download.html'>Download</a></p>
+
+<p><a href='/blog.html'>Blog</a></p>
+
+<p><a href='/about.html'>About</a></p>
+        
+      </header>
+      <section>
+        
+        <h2 id='latest_binaries'> Latest Binaries</h2>
+
+<p>Bandicoot v5 is the latest stable version released on May 21 2012.</p>
+<table>
+<thead>
+    <th>Platform</th>
+    <th>Size</th>
+    <th>MD5</th>
+</thead>
+<tr>
+    <td><a href='download/linux/amd64/bandicoot-v5.tar.gz'>linux/amd64</a></td>
+    <td>169K</td>
+    <td>b30b7f99c4c3ece5b8eafee1d93398c7</td>
+</tr>
+<tr>
+    <td><a href='download/linux/i386/bandicoot-v5.tar.gz'>linux/i386</a></td>
+    <td>154K</td>
+    <td>7747c659d667495b788e2dda53ebec85</td>
+</tr>
+<tr>
+    <td><a href='download/mac-os/amd64/bandicoot-v5.tar.gz'>mac-os/amd64</a></td>
+    <td>81K</td>
+    <td>c3d52d313b5b7837e6e4f83d0136ec4c</td>
+</tr>
+<tr>
+    <td><a href='download/mac-os/i386/bandicoot-v5.tar.gz'>mac-os/i386</a></td>
+    <td>75K</td>
+    <td>288a40d776bdeda259d39c3eaa565264</td>
+</tr>
+<tr>
+    <td><a href='download/windows/i386/bandicoot-v5.tar.gz'>windows/i386</a></td>
+    <td>198K</td>
+    <td>2ae0b1e14dcbc05459b120f63eb64520</td>
+</tr>
+</table>
+<h2 id='building_from_source'>Building from Source</h2>
+
+<p>You will need the following to build your own Bandicoot:</p>
+
+<ul>
+<li>a UNIX or a Windows system (ILP32 or LP64)</li>
+
+<li>C99 compliant compiler</li>
+
+<li>standard C library</li>
+
+<li>parser generator (bison or byacc)</li>
+
+<li>lexical analyzer generator (lex or flex)</li>
+
+<li>cURL</li>
+
+<li>sed</li>
+
+<li>git</li>
+</ul>
+
+<p>Once the tools are installed (e.g. via XCode on Mac or &#34;apt-get install gcc libc-dev bison flex sed curl git-core&#34; on Debian), you can proceed with the following commands.</p>
+
+<p>Getting the sources and building the system:</p>
+<div class='highlight'><pre><code class='bash'><span class='nv'>$ </span>git clone https://github.com/bandilab/bandicoot.git
+<span class='nv'>$ </span><span class='nb'>cd </span>bandicoot
+<span class='nv'>$ </span>./ctl dist -m64 <span class='c'># or with -m32 for 32-bit architectures</span>
+</code></pre>
+</div>
+<p>Running the test cases:</p>
+<div class='highlight'><pre><code class='bash'><span class='nv'>$ </span>./ctl pack
+<span class='nv'>$ </span>./ctl <span class='nb'>test</span>
+</code></pre>
+</div>
+<p>Contributing:</p>
+<div class='highlight'><pre><code class='bash'><span class='nv'>$ </span>./ctl todos
+<span class='nv'>$ </span>lynx http://groups.google.com/group/bandicoot
+</code></pre>
+</div>
+      </section>
+      <footer><p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+<p><small>&copy; 2012 bandilab.org</small></p>
+</footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+  </body>
+</html>
