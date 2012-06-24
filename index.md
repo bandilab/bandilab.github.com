@@ -37,8 +37,3 @@ Here are some of the features:
 * supports persistency via global variables (with transactions and ACID)
 * can run on multiple computers in a distributed mode
 * small binary ~100KB
-
-Follow:
-* GitHub: @bandilab
-* Twitter: [@bandilab](http://twitter.com/bandilab)
-* [Google Group](http://groups.google.com/group/bandicoot)

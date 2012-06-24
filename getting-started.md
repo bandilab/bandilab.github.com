@@ -5,12 +5,10 @@ title: bandicoot - getting started
 
 ## Start Up
 
-{% highlight bash %}
-$ tar xvfz bandicoot-v5.tar.gz
-$ cd bandicoot-v5/examples
-$ mkdir volume
-$ ./bandicoot start -p 12345 -c program.b -d volume -s tx.state
-{% endhighlight %}
+    $ tar xvfz bandicoot-v5.tar.gz
+    $ cd bandicoot-v5/examples
+    $ mkdir volume
+    $ ./bandicoot start -p 12345 -c program.b -d volume -s tx.state
 
 To stop Bandicoot simply kill it or press CTRL-C in the terminal. All
 in-progress transactions will be rolled back automatically.
@@ -201,6 +199,7 @@ below removes all the tuples which do not match to the given boolean expression.
     }
 
 Insert test:
+
     $ curl http://localhost:12345/Titles
     title string
     The Iliad
@@ -222,6 +221,7 @@ Insert test:
     Grimm's Fairy Stories
 
 Update test:
+
     $ curl http://localhost:12345/Prices
     price real,title string
     26.4,The Iliad
@@ -239,6 +239,7 @@ Update test:
     13.05,Grimm's Fairy Stories
 
 Delete test:
+
     $ curl http://localhost:12345/Titles
     title string
     The Iliad
