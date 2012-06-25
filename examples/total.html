@@ -1,0 +1,68 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+ "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head>
+    <title>Total</title>
+    <script type="text/javascript" src="relation.js"></script>
+    <script type="text/javascript">
+    function $(elem) {
+        return document.getElementById(elem);
+    }
+
+    function callTotal() {
+        var csv = "name string,price real\n";
+
+        for (var i = 0; i < 3; i++) {
+            var name = $("n" + i).value;
+            var price = $("p" + i).value;
+            if (name === null || name == "" || price === null || price == "")
+                break;
+
+            csv += name + "," + price + "\n";
+        }
+
+        try {
+            var req = new XMLHttpRequest();
+            req.open("POST", "http://localhost:12345/Total", false);
+            req.send(csv);
+
+            if (req.status != 200)
+                throw "status: " + req.status;
+
+            var rel = new Rel(req.responseText);
+            var tuple = rel.next();
+            $("output").value = tuple["total"];
+        } catch (e) {
+            alert(e);
+        }
+    }
+    </script>
+</head>
+<body>
+    <table>
+        <thead>
+            <th>Name</th>
+            <th>Price</th>
+        </thead>
+        <tr>
+            <td><input type='text' id='n0'></input></td>
+            <td><input type='text' id='p0'></input></td>
+        </tr>
+        <tr>
+            <td><input type='text' id='n1'></input></td>
+            <td><input type='text' id='p1'></input></td>
+        </tr>
+        <tr>
+            <td><input type='text' id='n2'></input></td>
+            <td><input type='text' id='p2'></input></td>
+        </tr>
+        <tr>
+            <td><input type='button' value='Calc' onclick='callTotal()'></td>
+            <td><input type='text' id='output' disabled='true'></input></td>
+    </table>
+    <br/>
+    <br/>
+    <b>(*)</b> the program expects that the Bandicoot is listening on port 12345.
+</body>
+</html>

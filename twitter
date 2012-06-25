@@ -1,0 +1,45 @@
+#!/usr/bin/python
+
+from os import path
+from time import time
+import sys 
+import httplib
+try:
+    import json
+except ImportError:
+    import simplejson as json 
+
+def main():
+    fname = '/tmp/@bandilab.json'
+
+    if not path.exists(fname) or time() - path.getmtime(fname) > 60 * 60:
+        conn = httplib.HTTPSConnection("api.twitter.com")
+        conn.request('GET',
+            '/1/statuses/user_timeline.json?screen_name=bandilab&count=5')
+        resp = conn.getresponse()
+        if resp.status == 200:
+            out = open(fname, 'wb')
+            out.write(resp.read())
+            out.flush()
+
+    infile = open(fname, 'rb')
+    results = json.load(infile)
+    style = 'padding: 0 0 5px 0;text-align:right;width:95px;vertical-align:top;font-weight:bold;'
+    print '<div style="text-align:right">Latest News (<a href="http://twitter.com/bandilab">subscribe</a>)</div>'
+    print '<hr style="color: #009445;"/>'
+    print '<table style="margin-bottom:1em;">'
+    for status in results:
+        d = status['created_at'].split()
+        x = d[3].split(':')
+        t = '<tr>'
+        t += '<td style="' + style + '">'
+        t +=     d[1] + ' ' + d[2] + ' ' + x[0] +':' + x[1]
+        t += '</td>'
+        t += '<td style="padding: 0 0 5px 5px;vertical-align:top;">' + status['text'] + '</td>'
+        t += '</tr>'
+        print t
+
+    print '</table>'
+
+if __name__ == '__main__':
+    main()

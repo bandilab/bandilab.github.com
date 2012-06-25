@@ -1,0 +1,348 @@
+<!--#include file="_header.html"-->
+
+<p>This is a specification page for an obsolete version of Bandicoot - v4. For
+the current version please go to the
+<a href="specification.html">Bandicoot specification site</a>.
+
+<ul>
+    <li><a href="#language">Language Specification</a></li>
+    <ul>
+        <li><a href="#keywords">Keywords</a></li>
+        <li><a href="#program_structure">Program Structure</a></li>
+        <li><a href="#primitive_types">Primitive Types</a></li>
+        <li><a href="#identifiers">Identifiers</a></li>
+        <li><a href="#relational_types">Relational Types</a></li>
+        <li><a href="#relational_variables">Relational Variables</a></li>
+        <li><a href="#functions">Functions</a></li>
+        <li><a href="#relational_expressions">Relational Expressions</a></li>
+    </ul>
+    <li><a href="#transactions">Transactions</a></li>
+    <li><a href="#api">Application Programming Interface</a></li>
+</ul>
+
+<a name="language"></a>
+<h1>Language Specification</h1>
+
+<a name="keywords"></a>
+<h2>Keywords</h2>
+
+<p>Here are the keywords which are currently in use:</p>
+
+<table class="padded">
+    <tr>
+        <td>extend</td>
+        <td>fn</td>
+        <td>int</td>
+        <td>long</td>
+    </tr>
+    <tr>
+        <td>project</td>
+        <td>real</td>
+        <td>rel</td>
+        <td>rename</td>
+    </tr>
+    <tr>
+        <td>return</td>
+        <td>select</td>
+        <td>string</td>
+        <td>summary</td>
+    </tr>
+</table>
+
+<a name="program_structure"></a>
+<h2>Program Structure</h2>
+
+<p>A program is defined in a single source file. The file is evaluated from
+top to bottom in one pass (similar to the C language).  The top-level elements
+of the program can be of the following types:</p>
+<ul>
+    <li>relational type declarations</li>
+    <li>relational variable declarations</li>
+    <li>function declarations</li>
+</ul>
+<p>The convention for Bandicoot source file extension is &quot;.b&quot;.</p>
+
+<a name="primitive_types"></a>
+<h2>Primitive Types</h2>
+
+<p>Primitive types are scalar types used for attributes, input and output
+parameters for functions. There are four types available:</p>
+
+<table class="padded">
+    <thead align="left">
+        <th>Type</th>
+        <th>Size</th>
+        <th>Description</th>
+    </thead>
+    <tr>
+        <td>int</td>
+        <td>32-bit</td>
+        <td>signed integer</td>
+    </tr>
+    <tr>
+        <td>long</td>
+        <td>64-bit</td>
+        <td>signed integer</td>
+    </tr>
+    <tr>
+        <td>real</td>
+        <td>64-bit</td>
+        <td>IEEE 754 double precision</td>
+    </tr>
+    <tr>
+        <td>string</td>
+        <td>0-1024 bytes</td>
+        <td>UTF-8 encoded string</td>
+    </tr>
+</table>
+
+<p>The primitive types are referenced within this specification as
+<i>PrimitiveType</i>.</p>
+
+<a name="identifiers"></a>
+<h2>Identifiers</h2>
+
+<p>Here is the regular expression defining an identifier:
+&quot;[_a-zA-Z0-9]+&quot;. Maximum identifier length is 32 characters.
+Below you will find the following references to the identifiers:</p>
+<ul>
+    <li><i>TypeName</i></li>
+    <li><i>AttrName</i></li>
+    <li><i>VarName</i></li>
+    <li><i>ParamName</i></li>
+    <li><i>FuncName</i></li>
+</ul>
+
+<a name="relational_types"></a>
+<h2>Relational Types</h2>
+
+<p>There are two ways to declare a relational type: named and inline. Named
+declarations give an identifier to some particular type so that it can be
+referenced in the code later. Inline (or anonymous) declarations are useful
+when the type is used only once (e.g. as an input or output function
+parameter).</p>
+
+<p>Named type can be declared in the following way:</p>
+
+<pre>
+<b>rel</b> <i>TypeName</i>
+{
+    <i>AttrName</i> : <i>PrimitiveType</i> [,]
+    [more attributes]
+}
+</pre>
+
+<p>and inline type:</p>
+<pre>
+<b>rel</b>
+{
+    <i>AttrName</i> : <i>PrimitiveType</i> [,]
+    [more attributes]
+}
+</pre>
+
+<p>The relational types (both inline and names) are referenced within this
+specification as <i>RelType</i>.</p>
+
+<a name="relational_variables"></a>
+<h2>Relational Variables</h2>
+
+<p>Relational variables are used for keeping the program state. The system
+provides two types of variables:</p>
+<ul>
+<li>global variables</li>
+<li>local/temporary variables</li>
+</ul>
+
+<p>Here is how you can declare a global variable named <i>VarName</i>.</p>
+
+<pre>
+<i>VarName</i> : <i>RelType</i> ;
+</pre>
+ 
+<p>
+<p>The relational variables are referenced within this specification as
+<i>RelVar</i>.</p>
+
+<a name="functions"></a>
+<h2>Functions</h2>
+
+<p>Functions are identified by names which must be unique across the whole
+program source file. A function can make complex state transformations on top
+of the global variables (see <a href="#transactions">Transactions</a> section).
+</p>
+
+<pre>
+<b>fn</b> <i>FuncName</i> ( [<i>ParamName</i> : <i>RelType</i>] ) [: <i>RelType</i>]
+{
+    <i>FuncBody</i>
+}
+</pre>
+
+<p>Function body (<i>FuncBody</i>) is a list of statements evaluated from top
+to bottom. The list is separated with the semicolons (&quot;;&quot;).
+Statements can be of three types:</p>
+<ul>
+    <li>global variable assignment
+<pre>
+<i>VarName</i> = <i>RelExpr</i> ;
+</pre>
+    </li>
+    <li>temporary variable declaration and assignment
+<pre>
+<i>VarName</i> := <i>RelExpr</i> ;
+</pre>
+    </li>
+    <li>return statement (only if a function declares its output type)
+<pre>
+<b>return</b> <i>RelExpr</i> ;
+</pre>
+    </li>
+</ul>
+
+<p>A function cannot call another function. Also, only one assignment per
+global relational variable is possible within a function body. After the
+assignment the global variable cannot be accessed anymore (within the same
+function). This is a temporary limitation and you can workaround it with
+the help of temporary variables.</p>
+
+<a name="relational_expressions"></a>
+<h2>Relational Expressions</h2>
+
+<p>Relational expressions (<i>RelExpr</i>) are the main building blocks of
+your programs. These expressions are composed by applying relational operators
+to relational variables (global or local). The minimum relational expression is
+an identifier which references a relational variable (e.g. books).</p>
+
+<h3>Rename</h3>
+
+<pre>
+<i>RelExpr</i> <b>rename</b> ( <i>ToAttrName</i> = <i>FromAttrName</i> [,] [more attributes] )
+</pre>
+
+<h3>Project</h3>
+
+<pre>
+<i>RelExpr</i> <b>project</b> ( <i>AttrName</i> [,] [more attributes] )
+</pre>
+
+<h3>Extend</h3>
+
+<pre>
+<i>RelExpr</i> <b>extend</b> ( <i>AttrName</i> = <i>PrimitiveExpr</i> [,] [more attributes] )
+</pre>
+
+<h3>Select</h3>
+
+<pre>
+<i>RelExpr</i> <b>select</b> ( <i>BooleanExpr</i> )
+</pre>
+
+<h3>Union</h3>
+
+<pre>
+<i>RelExpr</i> + <i>RelExpr</i>
+</pre>
+
+<h3>Minus (Semidifference)</h3>
+
+<pre>
+<i>RelExpr</i> - <i>RelExpr</i>
+</pre>
+
+<h3>Natural Join</h3>
+
+<pre>
+<i>RelExpr</i> * <i>RelExpr</i>
+</pre>
+
+<h3>Summary</h3>
+
+<p>Unary version:</p>
+<pre>
+<i>RelExpr</i> <b>summary</b> ( <i>AttrName</i> = <i>SumFunc</i> [,] [more attributes] )
+</pre>
+
+<p>Binary version:</p>
+<pre>
+( <i>RelExpr</i> , <i>RelExpr</i> ) <b>summary</b> ( <i>AttrName</i> = <i>SumFunc</i> [,] [more attributes] )
+</pre>
+
+<p>The are several pre-defined summary functions (<i>SumFunc</i>) available in
+the system:</p>
+<ul>
+    <li>add - add up values of an attribute
+<pre>
+add ( <i>AttrName</i> , <i>DefVal</i> )
+</pre>
+    </li>
+    <li>avg - average of values of an attribute
+<pre>
+avg ( <i>AttrName</i> , <i>DefVal</i> )
+</pre>
+    </li>
+    <li>cnt - count the number of tuples
+<pre>
+cnt ( )
+</pre>
+    </li>
+    <li>max - maximum value of an attribute
+<pre>
+max ( <i>AttrName</i> , <i>DefVal</i> )
+</pre>
+    </li>
+    <li>min - minimum value of an attribute
+<pre>
+min ( <i>AttrName</i> , <i>DefVal</i> )
+</pre>
+    </li>
+</ul>
+
+<p>Where <i>DefVal</i> is a constant expression. The type of the expression
+should match the type of the result and attribute. The exception is the
+<i>avg</i> function where the default value and result are always real numbers.
+<i>DefVal</i> is used in those cases when the <i>RelExpr</i> body is empty.
+In case of the binary summary this can happen when there is no matching tuple
+in left <i>RelExpr</i> for a tuple in the right <i>RelExpr</i>.</p>
+
+<a name="transactions"></a>
+<h1>Transactions</h1>
+
+<p>Each invocation of a function implicitly creates a transaction. All
+the statements within a function are part of the same transaction.
+There are no explicit keywords to commit or rollback a transaction.
+If there is an error the rollback is performed automatically and an
+error code is returned to the client.</p>
+
+<p>Modification of a global variable is not allowed by two transactions at the
+same time. Therefore two functions which modify the same variable are
+serialized and executed one after the other. Read-only functions are executed
+in parallel with other read/write functions.</p> 
+
+<p>The level of isolation is always serializable and it means that if a read of
+the same variable occurs several times within a function it always returns
+the same data even if the variable is modified by a different function at
+the same time.</p>
+
+<a name="api"></a>
+<h1>Application Programming Interface</h1>
+
+<p>The Bandicoot API is based on the HTTP/1.1 protocol. The interface exposes
+all the functions defined in a program source file through
+<i>http://server:port/FuncName</i> URLs. The HTTP POST method must be used to
+invoke a function with an input parameter. Otherwise the HTTP GET is required.
+</p>
+
+<p>Both input and output parameters are exchanged in &quot;comma separated
+values&quot; format. The tuples are delimited with the &quot;\n&quot;
+end-of-line character. The first line is a relational head definition in the
+following format:</p> 
+<pre>
+<i>AttrName:PrimitiveType</i>[,][more attributes]
+</pre>
+
+<p>The comma or the end-of-line character can be escaped by using &quot;\&quot;
+character. It means the Bandicoot will not represent those characters and they
+will be treated as part of your data.</p>
+
+<!--#include file="_footer.html"-->

@@ -1,0 +1,3 @@
+title string,pages int,price real,genre string
+Oliver Twist,608,12.99,Fiction
+Grimm's Fairy Stories,560,14.50,Fairy tales

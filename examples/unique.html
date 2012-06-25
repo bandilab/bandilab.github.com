@@ -1,0 +1,33 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+ "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head>
+<title>Unique</title>
+<script type='text/javascript'>
+function callUnique() {
+    try {
+        var csv = "x int\n1\n2\n1\n2\n3";
+
+        var req = new XMLHttpRequest();
+        req.open("POST", "http://localhost:12345/Unique", false);
+        req.send(csv);
+
+        if (req.status == 200)
+            confirm(req.responseText);
+        else
+            throw "status: " + req.status;
+    } catch (e) {
+        alert(e);
+    }
+}
+</script>
+</head>
+<body>
+    Click Run to call the Unique function:
+    <input type='button' value="Run" onclick="callUnique()"></input>
+    <br/>
+    <br/>
+    <b>(*)</b> the program expects that the Bandicoot is listening on port 12345.
+</body>
+</html>

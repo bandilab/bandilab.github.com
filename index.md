@@ -31,8 +31,7 @@ which manages your book shelf:
 
 Here are some of the features:
 * native support for set-based programming using the relational algebra
-* simple syntax for common set-operators: &quot;+&quot; (union), &quot;-&quot;
-* (minus), etc.
+* simple syntax for common set-operators: &quot;+&quot; (union), &quot;-&quot; (minus), etc.
 * all functions are automatically exposed via HTTP, e.g. /List, /Append
 * supports persistency via global variables (with transactions and ACID)
 * can run on multiple computers in a distributed mode
