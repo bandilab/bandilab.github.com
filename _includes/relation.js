@@ -3,8 +3,10 @@ function Rel(csv) {
     this.head = new Head(this.lines[0]);
     this.pos = 1;
 
-    this.next = function(returnTupleAsArray) {
-        if (this.pos >= this.lines.length || this.lines[this.pos] == "")
+    // if returnArray is undefined returns an assoc. array attrName->value
+    // otherwise returns tuple values as array of strings
+    this.next = function(returnArray) {
+        if (this.pos >= this.lines.length || this.lines[this.pos] === "")
             return null;
 
         var attrs = split(this.lines[this.pos], ",");
@@ -14,22 +16,22 @@ function Rel(csv) {
         this.pos++;
 
         var res = attrs;
-        if (returnTupleAsArray === undefined) {
+        if (returnArray === undefined) {
             res = [];
             for (var i = 0; i < attrs.length; ++i)
                 res[this.head.names[i]] = attrs[i];
         }
 
         return res;
-    }
+    };
 
     this.reset = function() {
         this.pos = 1;
-    }
+    };
 
     this.count = function() {
         return this.lines.length - 1;
-    }
+    };
 }
 
 function Head(line) {
