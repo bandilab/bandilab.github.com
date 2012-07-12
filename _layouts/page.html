@@ -30,11 +30,12 @@
     </script-->
   </head>
   <body>
-    <div class="wrapper">
-      {% capture header %}{% include header.md %}{% endcapture %}
-      {% capture footer %}{% include footer.html %}{% endcapture %}
+    {% capture header %}{% include header.md %}{% endcapture %}
+    {% capture footer %}{% include footer.html %}{% endcapture %}
 
-      <header>{{ header | markdownify }}</header>
+    <header>{{ header | markdownify }}</header>
+
+    <div class="wrapper">
       <section>
         {% if page.blog %}
         <h1>{{ page.title }}</h1>
