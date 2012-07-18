@@ -161,12 +161,10 @@ header a small {
     width:auto;
     margin:0;
   }
-}
 
-@media print, screen and (max-width: 930px) {
   header {
+    position:relative;
     height:auto;
-    width:930px;
   }
 }
 
@@ -183,10 +181,6 @@ header a small {
 @media print, screen and (max-width: 480px) {
   body {
     padding:15px;
-  }
-  
-  header ul {
-    display:none;
   }
 }
 
