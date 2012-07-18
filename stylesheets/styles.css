@@ -165,7 +165,8 @@ header a small {
 
 @media print, screen and (max-width: 930px) {
   header {
-    height:80px;
+    height:auto;
+    width:930px;
   }
 }
 
@@ -176,12 +177,6 @@ header a small {
   
   pre, code {
     word-wrap:normal;
-  }
-}
-
-@media print, screen and (max-width: 570px) {
-  header {
-    height:120px;
   }
 }
 
