@@ -30,10 +30,10 @@
     </script-->
   </head>
   <body>
-    {% capture header %}{% include header.md %}{% endcapture %}
+    {% capture header %}{% include header.html %}{% endcapture %}
     {% capture footer %}{% include footer.html %}{% endcapture %}
 
-    <header>{{ header | markdownify }}</header>
+    <header>{{ header }}</header>
 
     <div class="wrapper">
       <section>
