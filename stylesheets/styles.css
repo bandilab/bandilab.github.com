@@ -127,22 +127,22 @@ header {
   left:0;
   width:100%;
   height:40px;
-  background-color:rgba(2, 2, 2, 0.8);
-  white-space:nowrap;
+  background-color:rgba(0, 148, 69, 0.8);
   /*
   box-shadow:0 3px 4px #222;
+  white-space:nowrap;
   */
   font-family:"Squada One";
   font-size:24px;
 }
 
 header a {
-  color:#e5e5e5;
   padding:10px;
+  color:white;
 }
 
 header a:hover {
-  color:#777;
+  color:#e5e5e5;
 }
 
 section {
@@ -163,21 +163,25 @@ header a small {
   }
 }
 
+@media print, screen and (max-width: 930px) {
+  header {
+    height:80px;
+  }
+}
+
 @media print, screen and (max-width: 720px) {
   body {
     word-wrap:break-word;
   }
   
-  header {
-    padding:0;
-  }
-  
-  header ul, header p.view {
-    position:static;
-  }
-  
   pre, code {
     word-wrap:normal;
+  }
+}
+
+@media print, screen and (max-width: 570px) {
+  header {
+    height:120px;
   }
 }
 

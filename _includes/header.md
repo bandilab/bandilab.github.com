@@ -1,2 +1,0 @@
-[\[/Band\|c00t\]](/) [Getting Started](/getting-started.html) [Specification](/specification.html) [Webapps](/webapps.html) [Download](/download.html) [Blog](/blog.html) [About](/about.html)
-<a href="https://github.com/bandilab/bandicoot"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png" alt="Fork me on GitHub"></a>
