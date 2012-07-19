@@ -126,7 +126,7 @@ header {
   top:0;
   left:0;
   width:100%;
-  height:40px;
+  height:auto;
   background-color:rgba(0, 148, 69, 0.8);
   /*
   box-shadow:0 3px 4px #222;
@@ -160,21 +160,6 @@ header a small {
   div.wrapper {
     width:auto;
     margin:0;
-  }
-
-  header {
-    position:relative;
-    height:auto;
-  }
-}
-
-@media print, screen and (max-width: 720px) {
-  body {
-    word-wrap:break-word;
-  }
-  
-  pre, code {
-    word-wrap:normal;
   }
 }
 
