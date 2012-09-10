@@ -5,6 +5,7 @@ title: bandicoot - getting started
 
 ## Start Up
 
+    $ curl -O http://bandilab.org/download/linux/amd64/bandicoot-v5.tar.gz
     $ tar xvfz bandicoot-v5.tar.gz
     $ cd bandicoot-v5/examples
     $ mkdir volume
@@ -255,6 +256,53 @@ Delete test:
     The Odyssey
     Grimm's Fairy Stories
 
-Now you know enough to start writing your own Bandicoot applications. If you
-are thinking of using Bandicoot with the JavaScript, you can find some useful
-information on the [webapps](webapps.html) page.
+
+## Webapps
+
+Connect your browser directly to the Bandicoot. To call a Bandicoot function
+from the JavaScript you can use the XMLHttpRequest object available in most
+browsers. Bandicoot supports the Cross-Origin Resource Sharing (CORS)
+specification which makes it easy to develop your web applications on a local
+computer.
+
+Here is a small JavaScript example which connects to the Bandicoot:
+
+{% highlight javascript %}
+var csv = "x int\n1\n2\n1\n2\n3";
+
+var req = new XMLHttpRequest();
+req.open("POST", "http://localhost:12345/Unique", false);
+req.send(csv);
+
+if (req.status == 200)
+    confirm(req.responseText);
+else
+    throw "status: " + req.status;
+{% endhighlight %}
+
+## relation.js
+
+For a more sophisticated program you will need some tool which can
+parse the Bandicoot output (CSV). The parser is called relation.js and provides
+the following functionality:
+
+* construct a new Rel object from the Bandicoot output:
+<pre>var rel = new Rel("greeting string\nHello!\nBonjour!\nGruezi!");</pre>
+* get the next tuple (returns a map of attribute names to values):
+<pre>for (var tuple = rel.next(); tuple != null; tuple = rel.next())
+    alert(tuple["greeting"]);</pre>
+* reset the object so that you can iterate through the tuples again:
+<pre>rel.reset();</pre>
+* get the values based on the index (you can pass any argument to the next call)
+<pre>for (var tuple = rel.next(1); tuple != null; tuple = rel.next(1))
+    alert(tuple[0]);</pre>
+
+relation.js source code (public domain):
+{% highlight javascript %}
+{% include relation.js %}
+{% endhighlight %}
+
+For a complete example of a webapp see total.html and total.b in the examples
+directory. The program dynamically constructs a request from the input fields,
+then calls the Total function, and finally parses the output with the
+relation.js displaying the results.
