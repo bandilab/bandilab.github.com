@@ -8,7 +8,7 @@ persistency capabilities, and run-time environment. The language is similar to
 general purpose programming languages where you write functions/methods and
 access data through variables. Though, in Bandicoot, you always manipulate data
 in sets using a small set-based algebra (the [relational
-algebra](http://bandilab.org/bandicoot-algebra.pdf). Here is a small program
+algebra](http://bandilab.org/bandicoot-algebra.pdf)). Here is a small program
 which manages your book shelf:
 
     type Books {
