@@ -1,8 +1,13 @@
-<p align="right"><i>2012-05-17: SQL vs. Bandicoot v5 -- Julius</i></p>
-
-<p>
-This is a new version of the previous blog ... To keep the information up
-date...
+---
+blog: true
+layout: page
+author: Julius Chrobak
+title: SQL vs. Bandicoot v5
+date: 2012 09 21
+---
+<p>This is an update of my previous blog on the SQL vs. Bandicoot comparison.
+You can find here are one-to-one comparisons of the well known SQL expressions
+and the Bandicoot v5 language.
 </p>
 
 <h3>SELECT FROM</h3>
@@ -31,7 +36,7 @@ derived columns:
         </td>
         <td width="50%">
 <pre>
-<b>project</b> title, author books
+<b>project</b> (title, author) books
 </pre>
         </td>
     </tr>
@@ -44,7 +49,7 @@ derived columns:
         </td>
         <td width="50%">
 <pre>
-<b>extend</b> age = 2011 - year books
+<b>extend</b> (age = 2011 - year) books
 
 </pre>
         </td>
@@ -60,8 +65,8 @@ derived columns:
         </td>
         <td width="50%">
 <pre>
-<b>project</b> title, author, age
-        (<b>extend</b> age = 2011 - year books)
+<b>project</b> (title, author, age)
+         (<b>extend</b> (age = 2011 - year) books)
 </pre>
         </td>
     </tr>
@@ -79,7 +84,7 @@ derived columns:
         </td>
         <td width="50%">
 <pre>
-<b>select</b> author == "John Irving" books
+<b>select</b> (author == "John Irving") books
 
 
 </pre>
@@ -125,9 +130,9 @@ with the same name and type):
         </td>
         <td width="50%">
 <pre>
-<b>summary</b> cnt = cnt, pages = (avg pages 0.0)
-        books
-        (<b>project</b> genre books)
+<b>summary</b> (cnt = cnt, pages = (avg pages 0.0))
+         books
+         (<b>project</b> genre books)
 
 
 </pre>
@@ -135,7 +140,7 @@ with the same name and type):
     </tr>
 </table>
 
-<h3>All together (ie using functions)</h3>
+<h3>All together (i.e. creating a function)</h3>
 <p>
 To get a better picture how this all works in reality I show you an example of
 a complete Bandicoot function. Let's imagine you have a simple database of books
@@ -144,13 +149,13 @@ author providing the genre you are interested in:
 </p>
 
 <pre>
-<b>fn</b> prices(g <b>string</b>) {author <b>string</b>, avgPrice <b>real</b>}
+<b>fn</b> Prices(g <b>string</b>) {author <b>string</b>, avgPrice <b>real</b>}
 {
-    <b>var</b> onSell = <b>join</b> stores (<b>select</b> genre == g books);
+    <b>var</b> onSell = <b>join</b> stores (<b>select</b> (genre == g) books);
 
-    <b>return</b> <b>summary</b> avgPrice = (avg price 0.0)
-                   onSell
-                   (<b>project</b> author onSell);
+    <b>return</b> <b>summary</b> (avgPrice = (avg price 0.0))
+                     onSell
+                     (<b>project</b> author onSell);
 }
 </pre>
 
