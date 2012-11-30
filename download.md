@@ -5,7 +5,39 @@ title: bandicoot - downloads
 
 ## Latest Binaries
 
-Bandicoot v5 is the latest stable version released on May 21 2012.
+Bandicoot v6-rc is the latest release candidate released on Nov 30 2012.
+
+<table>
+<thead>
+    <th>Platform</th>
+    <th>Size</th>
+    <th>MD5</th>
+</thead>
+<tr>
+    <td><a href="download/linux/amd64/bandicoot-v6-rc.tar.gz">linux/amd64</a></td>
+    <td>186KB</td>
+    <td>f20882be5a41140646d9fd7abbaed44b</td>
+</tr>
+<tr>
+    <td><a href="download/linux/i386/bandicoot-v6-rc.tar.gz">linux/i386</a></td>
+    <td>169KB</td>
+    <td>526a366e5a64ed6d50b315a6a96700db</td>
+</tr>
+<tr>
+    <td><a href="download/mac-os/amd64/bandicoot-v6-rc.tar.gz">mac-os/amd64</a></td>
+    <td>88KB</td>
+    <td>fd00176d6752cf89d682486f291be795</td>
+</tr>
+<tr>
+    <td><a href="download/mac-os/i386/bandicoot-v6-rc.tar.gz">mac-os/i386</a></td>
+    <td>83KB</td>
+    <td>04882469df1cb820b599a6bfa38a341e</td>
+</tr>
+</table>
+
+## Stable Binaries
+
+Bandicoot v5 is the stable version released on May 21 2012.
 
 <table>
 <thead>

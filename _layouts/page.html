@@ -27,6 +27,60 @@
          s.parentNode.insertBefore(ga, s);
       })();
     </script>
+    <script type="text/javascript">
+        function changeExample() {
+            var p = document.getElementById("example");
+            var s = document.getElementById("examplemenu");
+
+            var t = "";
+            var o = s.options[s.selectedIndex];
+            if (o.value == "readwrite") {
+                t = "type Books {\n" +
+                    "    title string,\n" +
+                    "    pages int,\n" +
+                    "    price real,\n" +
+                    "}\n" +
+                    "\n" +
+                    "var shelf Books;\n" +
+                    "\n" +
+                    "fn List() Books {\n" +
+                    "    return shelf;\n" +
+                    "}\n" +
+                    "\n" +
+                    "fn Append(b Books) void {\n" +
+                    "    shelf += b;\n" +
+                    "}";
+            } else if (o.value == "function") {
+                t = "type Books {\n" +
+                    "    title string,\n" +
+                    "    pages int,\n" +
+                    "    price real,\n" +
+                    "}\n" +
+                    "\n" +
+                    "fn Expensive(b Books) Books {\n" +
+                    "    return select (price > 100.0) b;\n" +
+                    "}\n" +
+                    "\n" +
+                    "fn Combine(b Books) Books {\n" +
+                    "    return select (pages < 100) (Expensive b);\n" +
+                    "}";
+            } else if (o.value == "operators") {
+                t = "type Books {\n" +
+                    "    title string,\n" +
+                    "    pages int,\n" +
+                    "    price real,\n" +
+                    "}\n" +
+                    "\n" +
+                    "fn PricePerTitle(b Books) {title string, avgPrice real} {\n" +
+                    "    var titles = project (title) b;\n" +
+                    "\n" +
+                    "    return summary (avgPrice = (avg price 0.0)) b titles;\n" +
+                    "}"
+            }
+
+            p.innerHTML = t;
+        }
+    </script>
   </head>
   <body>
     {% capture header %}{% include header.html %}{% endcapture %}
