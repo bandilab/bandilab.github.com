@@ -30,9 +30,9 @@ fn Append(b Books) void {
 </pre>
 
 Here are the main features:
-* functions are automatically exposed via HTTP using CSV for data, e.g. /List, /Append
-* supports persistency via global variables (with transactions and ACID)
-* can run on multiple computers to scale up the read throughput
+* functions are automatically exposed via [HTTP using CSV](specification.html#api) for data, e.g. /List, /Append
+* supports persistency via global variables (with [transactions](specification.html#transactions) and ACID)
+* can [run on multiple computers](blog/2011-06-22.Ostap.Running_on_Multiple_Nodes.html) to scale up the read throughput
 * built in operators from the relational algebra with a simple syntax, e.g. &quot;+&quot; (union), &quot;-&quot; (minus)
 * small binary ~100KB
 

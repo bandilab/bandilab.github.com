@@ -15,7 +15,7 @@ Table of contents:
   * [Functions](#functions)
   * [Relational Operators and Expressions](#relational_operators_and_expressions)
 * [Transactions](#transactions)
-* [API](#API)
+* [API](#api)
 
 # Language Specification
 ## Keywords
@@ -405,7 +405,7 @@ the same variable occurs several times within a function it always returns
 the same data even if the variable is modified by a different function at
 the same time.
 
-# API
+# API
 
 Bandicoot API is based on the HTTP/1.1 protocol. The interface exposes all the
 functions defined in a program source file through
