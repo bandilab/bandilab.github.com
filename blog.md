@@ -15,6 +15,11 @@ something you saw in a post, please send an email to
         <th>Date</th>
     </thead>
     <tr>
+        <td><a href="blog/2012-12-20.Julius.New_Built_In_Functions.html">New Built In Functions</a></td>
+        <td>Julius</td>
+        <td>2012-12-20</td>
+    </tr>
+    <tr>
         <td><a href="blog/2012-09-21.Julius.SQL_vs_Bandicoot_v5.html">SQL vs.  Bandicootv v5</a></td>
         <td>Julius</td>
         <td>2012-09-21</td>

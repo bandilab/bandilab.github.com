@@ -1,0 +1,69 @@
+---
+blog: true
+layout: page
+author: Julius Chrobak
+title: New Built In Functions
+date: 2012 12 20
+---
+<p>The latest version of Bandicoot language (still in development) comes with two new built in functions. Normally, I would not consider this to be important enough to write a blog about it but this time it is different. Those two functions are the first built in Bandicoot functions developers can use in primitive expressions, and more are coming. So stay tuned!</p>
+
+<h3>Packages</h3>
+<p>In order to support various built in functions in the future we decided to use a simple concept of packages to group them together according to their meaning and not to overload the user's namespace.</p>
+<p>There are two packages available right now:
+<ul>
+    <li><b>Time</b></li>
+    <li><b>String</b></li>
+</ul>
+</p>
+
+<h4>Time</h4>
+<p>The Time package groups together all functions related to time manipulation. The list of functions implemented is short:
+<ul>
+    <li><b>Now</b>: takes no parameters, returns current system time in UTC as long data type</li>
+</ul>
+</p>
+
+<h4>String</h4>
+<p>The String package groups together all functions which help to manipulate string attributes. This list is also very short:
+<ul>
+    <li><b>Index</b>: takes two string parameters, returns the position of the first occurrence of the second parameter in the first string. It returns -1 if there is no occurrence.</li>
+</ul>
+</p>
+
+<h3>Examples</h3>
+<p>Let's imagine we have a set of orders with an attribute called "created" which captures the time stamp when an order was created. There are two simple examples which come to my mind immediately and nicely demonstrate the use of the Time.Now function:</p>
+<pre>
+<b>var</b> orders {id <b>int</b>, user <b>string</b>, created <b>long</b>};
+
+# extend the input with the current time
+<b>fn</b> StoreOrder(in {id <b>int</b>, user <b>string</b>}) <b>void</b> {
+    orders += <b>extend</b> (created = Time.Now) in;
+}
+
+# returns order ids of the recent orders only (not older than 1 hour)
+<b>fn</b> Recent() {id <b>int</b>} {
+    <b>return</b> <b>select</b> (created &gt; Time.Now - 3600L * 1000L) orders;
+}
+</pre>
+
+<p>The String.Index function is also straightforward so I am going to put down only one example. It finds out the first occurrence of a word in each sentence from the input set in one go:</p>
+
+<pre>
+<b>fn</b> GetIndex(sentences {value <b>string</b>}, s <b>string</b>) {value <b>string</b>, idx <b>int</b>} {
+    <b>return</b> <b>extend</b> (idx = (String.Index value s)) sentences;
+}
+</pre>
+<pre>
+$ cat sentences.csv 
+value
+Hello World!
+This world is great. Isn't it?
+
+$ curl --data-binary @sentences.csv 'http://localhost:12345/GetIndex?s=world'
+idx,value
+5,This world is great. Isn't it?
+-1,Hello World!
+</pre>
+<p>Checkout the latest code from the <a href="https://github.com/bandilab/bandicoot.git">master branch</a> and give it a try!</p>
+<p>In the near future you can expect more functions to be built. Feel free to raise a github issue or drop me an email (julius <i>at</i> bandilab <i>dot</i> org) if you have any suggestions or ideas on what the next batch of functions added to the language should be.</p>
+
